@@ -34,6 +34,13 @@ namespace Ofd2Pdf
             {
                 OfdConverter converter = new OfdConverter(Input);
                 converter.ToPdf(OutPut);
+                PdfDocument pdf = new PdfDocument();
+                pdf.LoadFromFile(OutPut);
+                PdfPageBase page = pdf.Pages.Add();
+                pdf.Pages.Remove(page);
+                pdf.SaveToFile(OutPut);
+                pdf.Close();
+
                 return ConvertResult.Successful;
             }
             catch (Exception)
@@ -60,7 +67,10 @@ namespace Ofd2Pdf
                 // 尝试使用 Spire.Pdf 进行 PDF -> OFD 转换。若当前版本不支持，将会抛出异常。
                 var pdf = new Spire.Pdf.PdfDocument();
                 pdf.LoadFromFile(Input);
+                PdfPageBase page = pdf.Pages.Add();
+                pdf.Pages.Remove(page);
                 pdf.SaveToFile(OutPut, Spire.Pdf.FileFormat.OFD);
+                pdf.Close();
                 return ConvertResult.Successful;
             }
             catch (Exception)
