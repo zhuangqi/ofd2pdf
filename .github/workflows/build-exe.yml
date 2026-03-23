@@ -25,7 +25,11 @@ jobs:
       - name: Build solution (Release)
         run: |
           nuget restore "Ofd2Pdf.sln"
-          msbuild "Ofd2Pdf.sln" /p:Configuration=Release /p:Platform="Any CPU" /m
+          $vsInstall = & "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.Component.MSBuild -products * -property installationPath
+          if (-not $vsInstall) { throw 'Visual Studio installation with MSBuild not found' }
+          $msbuild = Join-Path $vsInstall 'MSBuild\Current\Bin\MSBuild.exe'
+          if (-not (Test-Path $msbuild)) { throw "MSBuild not found in $msbuild" }
+          & $msbuild "Ofd2Pdf.sln" /p:Configuration=Release /p:Platform="Any CPU" /m
 
       - name: Collect output files
         run: |
