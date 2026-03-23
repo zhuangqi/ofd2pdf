@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -23,34 +24,61 @@ namespace Ofd2Pdf
             else
             {
                 Converter converter = new Converter();
-
                 bool hasFailed = false;
 
-                for (int i = 0; i < args.Length; i++)
+                string cmd = args[0].ToLowerInvariant();
+                if (cmd == "ofd2pdf" || cmd == "pdf2ofd")
                 {
-                    string file = args[i];
-                    string PdfName = file.Substring(0, file.Length - 3) + "pdf";
-
-                    var result = converter.ConvertToPdf(file, PdfName);
-
-                    if (result == ConvertResult.Failed)
+                    for (int i = 1; i < args.Length; i++)
                     {
-                        Console.WriteLine("[Failed]: " + file);
-                        hasFailed = true;
-                    } else
-                    {
-                        Console.WriteLine("[Success]: " + file);
+                        string input = args[i];
+                        string output;
+                        ConvertResult result;
+
+                        if (cmd == "ofd2pdf")
+                        {
+                            output = Path.ChangeExtension(input, ".pdf");
+                            result = converter.ConvertToPdf(input, output);
+                        }
+                        else
+                        {
+                            output = Path.ChangeExtension(input, ".ofd");
+                            result = converter.ConvertToOfd(input, output);
+                        }
+
+                        if (result == ConvertResult.Failed)
+                        {
+                            Console.WriteLine($"[Failed] {cmd}: {input}");
+                            hasFailed = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[Success] {cmd}: {input} -> {output}");
+                        }
                     }
-                }
-
-                if (hasFailed)
-                {
-                    Environment.Exit(1);
                 }
                 else
                 {
-                    Environment.Exit(0);
+                    // 保留旧版兼容性：默认处理 OFD -> PDF
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        string input = args[i];
+                        string output = Path.ChangeExtension(input, ".pdf");
+                        var result = converter.ConvertToPdf(input, output);
+
+                        if (result == ConvertResult.Failed)
+                        {
+                            Console.WriteLine("[Failed]: " + input);
+                            hasFailed = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("[Success]: " + input);
+                        }
+                    }
                 }
+
+                Environment.Exit(hasFailed ? 1 : 0);
             }
         }
     }
