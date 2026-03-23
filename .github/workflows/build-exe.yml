@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup NuGet
-        uses: NuGet/setup-nuget@v3
+        uses: NuGet/setup-nuget@v2
 
       - name: Restore NuGet packages
         run: nuget restore "Ofd2Pdf.sln"
@@ -32,7 +32,7 @@ jobs:
           dir "Ofd2Pdf\bin\Release"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Ofd2Pdf-Release
           path: |
