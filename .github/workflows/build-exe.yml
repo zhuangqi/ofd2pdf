@@ -25,7 +25,12 @@ jobs:
       - name: Build solution (Release)
         run: |
           nuget restore "Ofd2Pdf.sln"
-          $vsInstall = & "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.Component.MSBuild -products * -property installationPath
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (-not (Test-Path $vswhere)) {
+            $vswhere = "${env:ProgramFiles} (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+          }
+          if (-not (Test-Path $vswhere)) { throw "vswhere.exe not found (tried $vswhere)" }
+          $vsInstall = & $vswhere -latest -requires Microsoft.Component.MSBuild -products * -property installationPath
           if (-not $vsInstall) { throw 'Visual Studio installation with MSBuild not found' }
           $msbuild = Join-Path $vsInstall 'MSBuild\Current\Bin\MSBuild.exe'
           if (-not (Test-Path $msbuild)) { throw "MSBuild not found in $msbuild" }
