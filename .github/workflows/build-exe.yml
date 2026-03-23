@@ -1,0 +1,40 @@
+name: Build .NET Framework EXE
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v3
+
+      - name: Restore NuGet packages
+        run: nuget restore "Ofd2Pdf.sln"
+
+      - name: Build solution (Release)
+        run: |
+          nuget restore "Ofd2Pdf.sln"
+          msbuild "Ofd2Pdf.sln" /p:Configuration=Release /p:Platform="Any CPU" /m
+
+      - name: Collect output files
+        run: |
+          dir "Ofd2Pdf\bin\Release"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Ofd2Pdf-Release
+          path: |
+            Ofd2Pdf\bin\Release\*.*
+            Ofd2Pdf\bin\Release\**\*
